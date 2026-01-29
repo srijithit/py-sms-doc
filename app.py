@@ -29,7 +29,7 @@ def init_excel():
 init_excel()
 
 # ================== MEMORY ==================
-users = {"patient":{}}
+users = {"patient":{"1:1"}}
 appointments = []
 prescriptions = []
 
@@ -100,7 +100,7 @@ HOME = STYLE + """
 <div class=box>
 <h2>Telemedicine Portal</h2>
 <a href="/login"><button>Patient Login</button></a>
-<a href="/register"><button style="background:#28a745">Register</button></a>
+<a href="/register"><button style="background:#28a745">Patient Register</button></a>
 <form method=post action="/doctor-pin">
 <input type=password name=pin placeholder="Doctor PIN">
 <button style="background:#6c757d">Doctor Login</button>
@@ -294,3 +294,4 @@ def logout():
 # ================== RUN ==================
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=8000,debug=True)
+
