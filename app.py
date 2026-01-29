@@ -113,15 +113,20 @@ LANG = {
 
 @app.before_request
 def set_lang():
-    if "lang" not in session:
+    lang = request.args.get("lang")
+
+    if lang in ["en", "ta", "hi"]:
+        session["lang"] = lang
+    else:
         session["lang"] = "en"
-    if request.args.get("lang") in ["en","ta","hi"]:
-        session["lang"] = request.args.get("lang")
 
+
+# ------------------ TRANSLATION FUNCTION ------------------
 def t(key):
-    return LANG.get(session.get("lang","en"), LANG["en"]).get(key, key)
+    lang = session.get("lang", "en")
+    return LANG.get(lang, LANG["en"]).get(key, key)
 
-# ✅ THIS LINE IS REQUIRED
+# ✅ REGISTER AFTER FUNCTION EXISTS
 app.jinja_env.globals.update(t=t)
 
 
