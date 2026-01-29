@@ -6,6 +6,125 @@ from openpyxl import Workbook, load_workbook
 app = Flask(__name__)
 app.secret_key = "secret123"
 
+# ================== LANGUAGE LABELS ==================
+LANG = {
+    "en": {
+        "title": "Telemedicine Portal",
+        "patient_login": "Patient Login",
+        "patient_register": "Patient Register",
+        "doctor_login": "Doctor Login",
+        "username": "Username",
+        "password": "Password",
+        "login": "Login",
+        "register": "Register",
+        "symptoms": "Describe symptoms",
+        "send": "Send",
+        "logout": "Logout",
+        "welcome": "Welcome",
+        "doctor_dashboard": "Doctor Dashboard",
+        "submit": "Submit",
+        "submitted": "Submitted. AI advice ready.",
+        "ai_sms": "🤖 AI SMS",
+        "sms_doctor": "📩 SMS Doctor",
+        "login_title": "Patient Login",
+"register_title": "Patient Registration",
+"create_username": "Create Username",
+"create_password": "Create Password",
+"full_name": "Full Name",
+"age": "Age",
+"gender": "Gender",
+"condition": "Condition",
+"area": "Area / Village",
+"phone": "Phone",
+"back_home": "⬅ Home",
+"doctor_pin": "Doctor PIN"
+
+
+    },
+    "ta": {
+        "title": "தொலை மருத்துவ சேவை",
+        "patient_login": "நோயாளர் உள்நுழைவு",
+        "patient_register": "நோயாளர் பதிவு",
+        "doctor_login": "மருத்துவர் உள்நுழைவு",
+        "username": "பயனர் பெயர்",
+        "password": "கடவுச்சொல்",
+        "submitted": "சமர்ப்பிக்கப்பட்டது. AI ஆலோசனை தயாராக உள்ளது.",    
+        "login": "உள்நுழை",
+        "register": "பதிவு",
+        "symptoms": "அறிகுறிகளை எழுதவும்",
+        "send": "அனுப்பு",
+        "logout": "வெளியேறு",
+        "welcome": "வரவேற்பு",
+        "doctor_dashboard": "மருத்துவர் கட்டுப்பாடு",
+        "submit": "சமர்ப்பிக்கவும்",
+        "ai_sms": "🤖 AI எஸ்எம்எஸ்",
+"sms_doctor": "📩 மருத்துவருக்கு எஸ்எம்எஸ்",
+"login_title": "நோயாளர் உள்நுழைவு",
+"register_title": "நோயாளர் பதிவு",
+"create_username": "பயனர் பெயரை உருவாக்கவும்",
+"create_password": "கடவுச்சொல் உருவாக்கவும்",
+"full_name": "முழு பெயர்",
+"age": "வயது",
+"gender": "பாலினம்",
+"condition": "நோய் நிலை",
+"area": "பகுதி / கிராமம்",
+"phone": "தொலைபேசி",
+"back_home": "⬅ முகப்பு",
+"doctor_pin": "மருத்துவர் பின்"
+
+
+
+    },
+    "hi": {
+        "title": "टेलीमेडिसिन पोर्टल",
+        "patient_login": "मरीज़ लॉगिन",
+        "patient_register": "मरीज़ पंजीकरण",
+        "doctor_login": "डॉक्टर लॉगिन",
+        "username": "उपयोगकर्ता नाम",
+        "password": "पासवर्ड",
+        "login": "लॉगिन",
+        "submitted": "सबमिट किया गया। एआई सलाह तैयार है।",
+        "register": "पंजीकरण",
+        "symptoms": "लक्षण लिखें",
+        "send": "भेजें",
+        "logout": "लॉगआउट",
+        "welcome": "स्वागत है",
+        "doctor_dashboard": "डॉक्टर डैशबोर्ड",
+        "submit": "जमा करें",
+        "ai_sms": "🤖 एआई एसएमएस",
+        "sms_doctor": "📩 डॉक्टर को एसएमएस",
+        "login_title": "मरीज़ लॉगिन",
+"register_title": "मरीज़ पंजीकरण",
+"create_username": "यूज़रनेम बनाएं",
+"create_password": "पासवर्ड बनाएं",
+"full_name": "पूरा नाम",
+"age": "उम्र",
+"gender": "लिंग",
+"condition": "बीमारी",
+"area": "क्षेत्र / गाँव",
+"phone": "फ़ोन",
+"back_home": "⬅ होम",
+"doctor_pin": "डॉक्टर पिन"
+
+
+
+    }
+}
+
+@app.before_request
+def set_lang():
+    if "lang" not in session:
+        session["lang"] = "en"
+    if request.args.get("lang") in ["en","ta","hi"]:
+        session["lang"] = request.args.get("lang")
+
+def t(key):
+    return LANG.get(session.get("lang","en"), LANG["en"]).get(key, key)
+
+# ✅ THIS LINE IS REQUIRED
+app.jinja_env.globals.update(t=t)
+
+
 # ================== DATA ==================
 os.makedirs("data", exist_ok=True)
 EXCEL = "data/hospital_data.xlsx"
@@ -29,7 +148,7 @@ def init_excel():
 init_excel()
 
 # ================== MEMORY ==================
-users = {"patient":{"1:1"}}
+users = {"patient":{}}
 appointments = []
 prescriptions = []
 
@@ -97,13 +216,19 @@ th,td{border:1px solid #ccc;padding:6px}
 """
 
 HOME = STYLE + """
+
 <div class=box>
-<h2>Telemedicine Portal</h2>
-<a href="/login"><button>Patient Login</button></a>
-<a href="/register"><button style="background:#28a745">Patient Register</button></a>
+<select onchange="location='?lang='+this.value">
+  <option value="en">English</option>
+  <option value="ta">தமிழ்</option>
+  <option value="hi">हिंदी</option>
+</select>
+<h2>{{ t('title') }}</h2>
+<a href="/login"><button style="background:#00a1ff">{{ t('patient_login') }}</button></a>
+<a href="/register"><button style="background:#28a745">{{ t('patient_register') }}</button></a>
 <form method=post action="/doctor-pin">
-<input type=password name=pin placeholder="Doctor PIN">
-<button style="background:#6c757d">Doctor Login</button>
+<input type="password" name="pin" placeholder="{{ t('doctor_pin') }}">
+<button style="background:#6c757d">{{ t('doctor_login') }}</button>
 <button type="button" onclick="sendSOS()" style="background:#dc3545">🚑 SOS 108</button>
 </form>
 <script>
@@ -115,55 +240,80 @@ function sendSOS(){
 """
 
 LOGIN = STYLE + """
+
 <div class=box>
-<h3>Patient Login</h3>
-<form method=post>
-<input name=username placeholder="Username" required>
-<input type=password name=password placeholder="Password" required>
-<button>Login</button>
-</form>
-<a href="/">⬅ Home</a>
+<select onchange="location='?lang='+this.value">
+  <option value="en">English</option>
+  <option value="ta">தமிழ்</option>
+  <option value="hi">हिंदी</option>
+</select>
+
+<h3>{{ t('login_title') }}</h3>
+
+<input name=username placeholder="{{ t('username') }}" required>
+<input type=password name=password placeholder="{{ t('password') }}" required>
+
+<button>{{ t('login') }}</button>
+
+<a href="/">{{ t('back_home') }}</a>
+
+
+
 </div>
 """
 
 REGISTER = STYLE + """
+
+
 <div class=box>
-<h3>Patient Registration</h3>
-<form method=post>
-<input name=username placeholder="Create Username" required>
-<input type=password name=password placeholder="Create Password" required>
-<input name=name placeholder="Full Name" required>
-<input name=age placeholder="Age" required>
-<input name=gender placeholder="Gender" required>
-<input name=condition placeholder="Condition" required>
-<input name=area placeholder="Area/Village" required>
-<input name=phone placeholder="Phone" required>
-<button>Register</button>
-</form>
-<p>{{msg}}</p>
-<a href="/">⬅ Home</a>
+<select onchange="location='?lang='+this.value">
+  <option value="en">English</option>
+  <option value="ta">தமிழ்</option>
+  <option value="hi">हिंदी</option>
+</select>
+<h3>{{ t('register_title') }}</h3>
+
+<input name=username placeholder="{{ t('create_username') }}" required>
+<input type=password name=password placeholder="{{ t('create_password') }}" required>
+<input name=name placeholder="{{ t('full_name') }}" required>
+<input name=age placeholder="{{ t('age') }}" required>
+<input name=gender placeholder="{{ t('gender') }}" required>
+<input name=condition placeholder="{{ t('condition') }}" required>
+<input name=area placeholder="{{ t('area') }}" required>
+<input name=phone placeholder="{{ t('phone') }}" required>
+
+<button>{{ t('register') }}</button>
+
+<a href="/">{{ t('back_home') }}</a>
+
 </div>
 """
 
 PATIENT = STYLE + """
+
+
 <div class=box>
+<select onchange="location='?lang='+this.value">
+  <option value="en">English</option>
+  <option value="ta">தமிழ்</option>
+  <option value="hi">हिंदी</option>
+</select>
 {% with m=get_flashed_messages() %}
 {% if m %}<script>alert("{{m[0]}}");</script>{% endif %}
 {% endwith %}
-<h3>Welcome {{user}}</h3>
-<form method=post action=/submit>
-<textarea name=symptoms placeholder="Describe symptoms" required></textarea>
-<button>Send</button>
-</form>
+<h3>{{ t('welcome') }} {{ user }}</h3>
+<textarea name=symptoms placeholder="{{ t('symptoms') }}"></textarea>
+<button>{{ t('send') }}</button>
+
 
 {% if session.get('sms_patient') %}
 <a href="{{session.pop('sms_patient')}}">
-<button style="background:#17a2b8">🤖 AI SMS</button></a>
+<button>{{ t('ai_sms') }}</button>
 {% endif %}
 
 {% if session.get('sms_doctor') %}
 <a href="{{session.pop('sms_doctor')}}">
-<button style="background:#6f42c1">📩 SMS Doctor</button></a>
+<button>{{ t('sms_doctor') }}</button>
 {% endif %}
 
 {% for p in data %}
@@ -178,8 +328,15 @@ PATIENT = STYLE + """
 """
 
 DOCTOR = STYLE + """
+
+
 <div class=box>
-<h3>Doctor Dashboard</h3>
+<select onchange="location='?lang='+this.value">
+  <option value="en">English</option>
+  <option value="ta">தமிழ்</option>
+  <option value="hi">हिंदी</option>
+</select>
+<h3>{{ t('doctor_dashboard') }}</h3>
 {% for a in apps %}
 <form method=post action=/reply>
 <b>{{a.patient}}</b><br>{{a.symptoms}}
@@ -251,7 +408,7 @@ def submit():
     session["sms_patient"]=sms_link(users[u+"_phone"],ai_auto_reply(s))
     session["sms_doctor"]=sms_link(DOCTOR_PHONE,f"Patient:{u}\nSymptoms:{s}")
 
-    flash("✅ Submitted. AI advice ready.")
+    flash(t("submitted"))
     return redirect("/dashboard")
 
 @app.route("/reply",methods=["POST"])
@@ -294,4 +451,3 @@ def logout():
 # ================== RUN ==================
 if __name__=="__main__":
     app.run(host="0.0.0.0",port=8000,debug=True)
-
