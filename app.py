@@ -113,18 +113,23 @@ LANG = {
 
 @app.before_request
 def set_lang():
-    lang = request.args.get("lang")
+    # If lang passed in URL, update session
+    if "lang" in request.args:
+        lang = request.args.get("lang")
+        if lang in ["en", "ta", "hi"]:
+            session["lang"] = lang
 
-    if lang in ["en", "ta", "hi"]:
-        session["lang"] = lang
-    else:
+    # Default language
+    if "lang" not in session:
         session["lang"] = "en"
+
 
 
 # ------------------ TRANSLATION FUNCTION ------------------
 def t(key):
     lang = session.get("lang", "en")
     return LANG.get(lang, LANG["en"]).get(key, key)
+
 
 # ✅ REGISTER AFTER FUNCTION EXISTS
 app.jinja_env.globals.update(t=t)
@@ -268,30 +273,45 @@ LOGIN = STYLE + """
 """
 
 REGISTER = STYLE + """
-
-
 <div class=box>
+
+
+<h3>{{ t('register_title') }}</h3>
+
+<form method=post class="compact">
+
+<div class=row>
+  <input name=username placeholder="{{ t('create_username') }}" required>
+  <input type=password name=password placeholder="{{ t('create_password') }}" required>
+</div>
+
+<div class=row>
+  <input name=name placeholder="{{ t('full_name') }}" required>
+  <input name=age placeholder="{{ t('age') }}" required>
+</div>
+
+<div class=row>
+  <input name=gender placeholder="{{ t('gender') }}" required>
+  <input name=phone placeholder="{{ t('phone') }}" required>
+</div>
+
+<div class=row>
+  <input name=condition placeholder="{{ t('condition') }}" required>
+  <input name=area placeholder="{{ t('area') }}" required>
+</div>
+
+<button>{{ t('register') }}</button>
+</form>
 <select onchange="location='?lang='+this.value">
   <option value="en">English</option>
   <option value="ta">தமிழ்</option>
   <option value="hi">हिंदी</option>
 </select>
-<h3>{{ t('register_title') }}</h3>
-<form method=post>
-<input name=username placeholder="{{ t('create_username') }}" required>
-<input type=password name=password placeholder="{{ t('create_password') }}" required>
-<input name=name placeholder="{{ t('full_name') }}" required>
-<input name=age placeholder="{{ t('age') }}" required>
-<input name=gender placeholder="{{ t('gender') }}" required>
-<input name=condition placeholder="{{ t('condition') }}" required>
-<input name=area placeholder="{{ t('area') }}" required>
-<input name=phone placeholder="{{ t('phone') }}" required>
-<button>{{ t('register') }}</button>
-</form>
 <p>{{msg}}</p>
 <a href="/">{{ t('back_home') }}</a>
 </div>
 """
+
 
 PATIENT = STYLE + """
 
