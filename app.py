@@ -254,12 +254,12 @@ LOGIN = STYLE + """
 </select>
 
 <h3>{{ t('login_title') }}</h3>
-
+<form method=post>
 <input name=username placeholder="{{ t('username') }}" required>
 <input type=password name=password placeholder="{{ t('password') }}" required>
 
 <button>{{ t('login') }}</button>
-
+</form>
 <a href="/">{{ t('back_home') }}</a>
 
 
@@ -277,7 +277,7 @@ REGISTER = STYLE + """
   <option value="hi">हिंदी</option>
 </select>
 <h3>{{ t('register_title') }}</h3>
-
+<form method=post>
 <input name=username placeholder="{{ t('create_username') }}" required>
 <input type=password name=password placeholder="{{ t('create_password') }}" required>
 <input name=name placeholder="{{ t('full_name') }}" required>
@@ -286,11 +286,10 @@ REGISTER = STYLE + """
 <input name=condition placeholder="{{ t('condition') }}" required>
 <input name=area placeholder="{{ t('area') }}" required>
 <input name=phone placeholder="{{ t('phone') }}" required>
-
 <button>{{ t('register') }}</button>
-
+</form>
+<p>{{msg}}</p>
 <a href="/">{{ t('back_home') }}</a>
-
 </div>
 """
 
@@ -307,8 +306,10 @@ PATIENT = STYLE + """
 {% if m %}<script>alert("{{m[0]}}");</script>{% endif %}
 {% endwith %}
 <h3>{{ t('welcome') }} {{ user }}</h3>
+<form method=post action=/submit>
 <textarea name=symptoms placeholder="{{ t('symptoms') }}"></textarea>
 <button>{{ t('send') }}</button>
+</form>
 
 
 {% if session.get('sms_patient') %}
